@@ -14,10 +14,12 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->web(append: [
             \App\Http\Middleware\SetLocale::class,
+
         ]);
 
         $middleware->alias([
             'verified.admin' => \App\Http\Middleware\VerifiedAdmin::class,
+            'clinic.role' => \App\Http\Middleware\EnsureClinicRole::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
