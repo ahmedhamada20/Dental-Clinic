@@ -16,9 +16,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('profile', [\App\Modules\Auth\Controllers\PatientProfileController::class, 'show']);
     Route::put('profile', [\App\Modules\Auth\Controllers\PatientProfileController::class, 'update']);
     Route::get('profile/medical-summary', [\App\Modules\Auth\Controllers\PatientProfileController::class, 'medicalSummary']);
+    Route::get('services', [\App\Modules\Patients\Controllers\PatientServiceController::class, 'index']);
+    Route::get('services/{service}', [\App\Modules\Patients\Controllers\PatientServiceController::class, 'show']);
+
 });
 
 // Patient services (public)
-Route::get('services', [\App\Modules\Patients\Controllers\PatientServiceController::class, 'index']);
-Route::get('services/{service}', [\App\Modules\Patients\Controllers\PatientServiceController::class, 'show']);
 
