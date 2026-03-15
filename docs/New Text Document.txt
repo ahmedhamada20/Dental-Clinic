@@ -1,0 +1,1294 @@
+Dental Clinic Management System
+System Analysis Document
+1. Project Overview
+
+النظام هو منصة إدارة عيادة أسنان تتكون من:
+
+Dashboard Web Application
+مبني بـ Laravel لإدارة العيادة.
+
+Mobile Application
+مبني بـ Flutter لاستخدام المرضى.
+
+الهدف من النظام:
+
+تنظيم المواعيد
+
+إدارة المرضى
+
+إدارة الزيارات الطبية
+
+إدارة خطط العلاج
+
+إصدار الفواتير
+
+متابعة المدفوعات
+
+إدارة الملفات الطبية
+
+إرسال إشعارات للمريض
+
+توفير تقارير تشغيلية وإدارية
+
+2. System Architecture
+
+النظام يتكون من 3 طبقات رئيسية.
+
+1️⃣ Backend
+
+التكنولوجيا:
+
+Laravel 12
+
+MySQL
+
+REST API
+
+Laravel Queue
+
+Firebase Notifications
+
+المهام:
+
+Business Logic
+
+Database Management
+
+Authentication
+
+Notifications
+
+Reports
+
+Invoice Generation
+
+2️⃣ Admin Dashboard
+
+تكنولوجيا:
+
+Laravel Blade أو Vue
+
+DataTables
+
+Charts
+
+يستخدمه:
+
+Admin
+
+Doctor
+
+Receptionist
+
+Assistant
+
+3️⃣ Mobile App
+
+التكنولوجيا:
+
+Flutter
+
+Riverpod
+
+Dio
+
+Firebase Messaging
+
+يستخدمه:
+
+Patient
+
+3. User Roles
+1. Admin
+
+صلاحيات كاملة:
+
+إدارة المستخدمين
+
+إدارة الخدمات
+
+إدارة المرضى
+
+إدارة العروض
+
+إدارة التقارير
+
+إدارة النظام
+
+2. Doctor
+
+يمكنه:
+
+رؤية المواعيد
+
+رؤية المرضى
+
+فتح الزيارة
+
+تعديل Dental Chart
+
+كتابة التشخيص
+
+إنشاء خطة علاج
+
+إضافة الخدمات التي تمت
+
+إنهاء الزيارة
+
+3. Receptionist
+
+يمكنه:
+
+إضافة مريض
+
+تعديل بيانات المريض
+
+حجز موعد
+
+Check-in للمريض
+
+إصدار الفواتير
+
+تحصيل المدفوعات
+
+إدارة قائمة الانتظار
+
+4. Assistant
+
+يمكنه:
+
+رفع ملفات
+
+رفع أشعة
+
+مساعدة الطبيب
+
+الاطلاع على الزيارات
+
+5. Patient (Mobile App)
+
+يمكنه:
+
+تسجيل حساب
+
+حجز موعد
+
+إلغاء موعد
+
+رؤية الفواتير
+
+رؤية الملفات الطبية
+
+رؤية خطة العلاج
+
+استقبال الإشعارات
+
+4. Patient Management
+إنشاء المريض
+
+يمكن إنشاء المريض بطريقتين:
+
+1️⃣ تسجيل من التطبيق
+2️⃣ إضافة من الداش بورد
+
+بيانات المريض
+
+Name
+
+Phone
+
+Password
+
+Gender
+
+Birth Date
+
+Address
+
+Medical Notes
+
+Chronic Diseases
+
+Allergies
+
+Patient Medical File
+
+يتضمن:
+
+Dental Chart
+
+Medical Notes
+
+Files
+
+X-rays
+
+Prescriptions
+
+Treatment Plans
+
+Visit History
+
+Invoices
+
+5. Dental Chart (Odontogram)
+
+النظام يحتوي على خريطة الأسنان.
+
+الخصائص
+
+32 Tooth
+
+Upper / Lower
+
+Tooth Status
+
+حالات الأسنان
+
+Healthy
+
+Caries
+
+Filling
+
+Root Canal
+
+Crown
+
+Implant
+
+Extracted
+
+Bridge
+
+من يعدل Dental Chart
+
+Doctor
+
+Assistant (اختياري)
+
+6. Appointment Management
+إعداد أوقات العمل
+
+يتم تحديدها من الداش بورد.
+
+يمكن تحديد:
+
+أيام العمل
+
+وقت البداية
+
+وقت النهاية
+
+الحد اليومي للمرضى
+
+حجز الموعد
+
+المريض:
+
+1️⃣ يختار الخدمة
+2️⃣ يختار اليوم
+3️⃣ يختار الوقت
+
+قواعد الحجز
+
+لا يمكن حجز نفس الوقت مرتين
+
+يتم حساب مدة الخدمة
+
+لا يسمح بالتعارض بين المواعيد
+
+يجب الحجز قبل الموعد
+
+حالات الحجز
+
+Pending
+
+Checked In
+
+In Progress
+
+Completed
+
+Cancelled By Patient
+
+Cancelled By Clinic
+
+No Show
+
+7. Waiting List System
+
+إذا لم توجد مواعيد:
+
+المريض يمكنه الدخول إلى:
+
+Waiting List
+
+عند إلغاء موعد
+
+النظام:
+
+1️⃣ يبحث عن أول مريض مناسب
+2️⃣ يرسل له Notification
+3️⃣ يفتح له فرصة الحجز
+
+8. Ticket System
+
+المريض يحصل على رقم دخول.
+
+مثال:
+
+Ticket 23
+خصائص التذكرة
+
+يومية
+
+تبدأ من 1 كل يوم
+
+مرتبطة بالزيارة
+
+حالات التذكرة
+
+Waiting
+
+Called
+
+With Doctor
+
+Done
+
+9. Visit Management
+
+يجب الفصل بين:
+
+Appointment
+و
+Visit
+
+Appointment
+
+موعد محجوز مسبقًا.
+
+Visit
+
+الزيارة الفعلية داخل العيادة.
+
+داخل الزيارة
+
+الدكتور يمكنه:
+
+كتابة الشكوى
+
+التشخيص
+
+الملاحظات
+
+تعديل Dental Chart
+
+إضافة الخدمات
+
+إنشاء خطة علاج
+
+رفع ملفات
+
+10. Medical Services
+
+النظام يحتوي على قائمة خدمات.
+
+خصائص الخدمة
+
+Name AR
+
+Name EN
+
+Description
+
+Default Price
+
+Duration
+
+Active
+
+Bookable
+
+أمثلة الخدمات
+
+Consultation
+
+Cleaning
+
+Filling
+
+Root Canal
+
+Extraction
+
+Whitening
+
+11. Treatment Plans
+
+الدكتور يمكنه إنشاء خطة علاج.
+
+مثال
+
+Root Canal
+
+Sessions:
+
+Session 1
+
+Session 2
+
+Session 3
+
+خصائص الخطة
+
+Title
+
+Description
+
+Estimated Cost
+
+Sessions
+
+Status
+
+حالات الخطة
+
+Draft
+
+Active
+
+Completed
+
+Cancelled
+
+12. Invoices System
+
+الفاتورة تصدر بعد انتهاء الكشف.
+
+محتوى الفاتورة
+
+Invoice Number
+
+Patient
+
+Visit
+
+Services
+
+Total
+
+Discount
+
+Paid
+
+Remaining
+
+حالات الفاتورة
+
+Unpaid
+
+Partially Paid
+
+Paid
+
+Cancelled
+
+13. Payments
+
+يدعم النظام دفع متعدد الطرق.
+
+طرق الدفع
+
+Cash
+
+Bank Transfer
+
+Instapay
+
+Vodafone Cash
+
+مثال
+
+فاتورة 1000
+
+الدفع:
+
+500 Cash
+
+500 Instapay
+
+14. Promotions & Discounts
+
+النظام يدعم العروض.
+
+أنواع الخصومات
+
+Discount on Invoice
+
+Discount on Service
+
+Free Consultation
+
+خصائص العرض
+
+Title
+
+Type
+
+Value
+
+Start Date
+
+End Date
+
+15. Medical Files
+
+لكل مريض ملفات طبية.
+
+أنواع الملفات
+
+X-ray
+
+Prescription
+
+Before/After Images
+
+Lab Result
+
+Other
+
+خصائص الملف
+
+Name
+
+File Type
+
+Uploaded By
+
+Upload Date
+
+Notes
+
+16. Notifications
+
+الإشعارات عبر:
+
+Firebase Cloud Messaging
+
+إشعارات المريض
+
+Appointment Created
+
+Appointment Confirmed
+
+Appointment Cancelled
+
+Appointment Reminder
+
+Invoice Created
+
+File Uploaded
+
+إشعارات الإدارة
+
+New Booking
+
+Booking Cancelled
+
+Patient Registered
+
+Payment Received
+
+17. Reports System
+
+التقارير جزء أساسي من النظام.
+
+Appointment Reports
+
+Daily Appointments
+
+Weekly Appointments
+
+Cancelled Appointments
+
+No Show Rate
+
+Financial Reports
+
+Daily Revenue
+
+Monthly Revenue
+
+Revenue by Payment Method
+
+Patient Reports
+
+New Patients
+
+Returning Patients
+
+Active Patients
+
+Service Reports
+
+Most Used Services
+
+Revenue by Service
+
+Doctor Reports
+
+Patients Seen
+
+Visits Completed
+
+18. Audit Log
+
+النظام يسجل كل العمليات المهمة.
+
+أمثلة
+
+Patient Created
+
+Appointment Updated
+
+Invoice Generated
+
+Payment Added
+
+19. Multi Language
+
+النظام يدعم:
+
+Arabic
+
+English
+
+Dashboard
+
+RTL support
+
+Mobile
+
+Localization
+
+20. Security
+
+النظام يعتمد على:
+
+Laravel Auth
+
+Role Permissions
+
+API Authentication
+
+21. Future Expansion
+
+النظام مصمم ليكون قابل للتوسع.
+
+مستقبلاً يمكن إضافة:
+
+Multi Branch
+
+Inventory Management
+
+Online Payment
+
+SMS Integration
+
+Insurance Integration
+
+22. Technology Stack
+Backend
+
+Laravel 12
+
+MySQL
+
+REST API
+
+Queue Jobs
+
+Redis (optional)
+
+Dashboard
+
+Blade / Vue
+
+DataTables
+
+ChartJS
+
+Mobile
+
+Flutter
+
+Riverpod
+
+Dio
+
+Firebase
+
+الخطوة التالية
+
+الوثيقة هذه تمثل Business + System Analysis.
+
+الخطوة القادمة التي أنصح بها هي:
+
+Database Architecture
+
+وهي أهم جزء في المشروع.
+
+سأعطيك في الرد القادم:
+
+1️⃣ Database Design كامل (30+ Table)
+2️⃣ ERD Structure احترافي
+3️⃣ Laravel Models Relations
+4️⃣ Migration Plan
+5️⃣ أفضل تصميم لـ Dental Chart
+
+ولو حابب أكملها اكتب:
+
+اعمل Database Design
+
+والخطوة اللي بعدها ستكون أهم خطوة في المشروع كله.
+
+عايز تكتب وصف للعميل بالكامل علشان اديله لمبرمج الفلاتر يفهم المشورع وطريقه التشغيل 
+وكمان عايز تكتب وصف للمشروع علشان اخلي copilot 
+
+ممتاز يا أحمد.
+هجهز لك حاجتين منفصلتين بشكل احترافي:
+
+1️⃣ Client Project Description → تديه لمبرمج Flutter يفهم المشروع بالكامل وطريقة التشغيل.
+2️⃣ Copilot Master Prompt → تستخدمه مع Copilot ليبدأ بناء المشروع بشكل صحيح.
+
+سأكتبهم بصيغة احترافية وواضحة للمطورين.
+
+أولاً
+Client Project Description
+(Description for Flutter Developer)
+Project Overview
+
+The project is a Dental Clinic Management System consisting of two main components:
+
+Laravel Dashboard + REST API
+
+Flutter Mobile Application for Patients
+
+The purpose of the system is to digitize the workflow of a dental clinic, including:
+
+Patient management
+
+Appointment scheduling
+
+Visit management
+
+Dental chart
+
+Treatment plans
+
+Medical files
+
+Invoices and payments
+
+Notifications
+
+Reporting
+
+Currently, the clinic has one branch and one doctor, but the system should be designed in a way that allows expansion in the future.
+
+System Components
+1. Admin Dashboard (Laravel)
+
+The dashboard will be used by:
+
+Admin
+
+Doctor
+
+Receptionist
+
+Assistant
+
+The dashboard manages:
+
+Patients
+
+Appointments
+
+Visits
+
+Dental chart
+
+Treatment plans
+
+Services
+
+Invoices
+
+Payments
+
+Promotions
+
+Medical files
+
+Reports
+
+Notifications
+
+2. Mobile Application (Flutter)
+
+The mobile app is only for patients.
+
+The main goal of the mobile app is to allow patients to:
+
+Create an account
+
+Book appointments
+
+Cancel appointments
+
+Receive notifications
+
+View invoices
+
+View treatment plans
+
+View dental files and X-rays
+
+View ticket number for clinic entry
+
+Patient Authentication
+
+Patients will register using:
+
+Phone number
+
+Password
+
+Authentication will be handled through the Laravel API.
+
+Appointment Booking System
+
+Patients can book appointments from the mobile app.
+
+Booking Flow
+
+Patient selects a service
+
+Patient selects date
+
+Patient selects available time slot
+
+Each service has a specific duration, so the system calculates available slots dynamically.
+
+Appointment Rules
+
+Two patients cannot book the same time.
+
+Booking must be done before the appointment time.
+
+Service duration determines slot availability.
+
+Waiting List Feature
+
+If no appointments are available:
+
+The patient can join a waiting list.
+
+If another patient cancels their appointment:
+
+The system will notify the first patient in the waiting list to complete booking.
+
+Appointment States
+
+Appointments have the following statuses:
+
+Pending
+
+Checked In
+
+In Progress
+
+Completed
+
+Cancelled by Patient
+
+Cancelled by Clinic
+
+No Show
+
+Check-in Process
+
+When the patient arrives at the clinic:
+
+The receptionist performs Check-in from the dashboard.
+
+At this moment:
+
+The appointment becomes a Visit
+
+A Ticket Number is generated.
+
+Ticket System
+
+Each patient receives a ticket number.
+
+Example:
+
+Ticket 23
+
+Rules:
+
+Ticket numbers reset daily.
+
+The ticket is displayed in the mobile app.
+
+Used for patient order inside the clinic.
+
+Visit Process
+
+During the visit, the doctor can:
+
+Write diagnosis
+
+Update dental chart
+
+Add performed services
+
+Upload files or X-rays
+
+Create treatment plan
+
+Add notes
+
+Dental Chart
+
+The system includes a full dental chart (odontogram).
+
+It contains:
+
+32 teeth
+
+Upper and lower jaw
+
+Tooth status tracking
+
+Possible tooth states include:
+
+Healthy
+
+Caries
+
+Filling
+
+Root Canal
+
+Crown
+
+Implant
+
+Extracted
+
+Bridge
+
+Only the doctor should modify the dental chart.
+
+Treatment Plan
+
+The doctor can create treatment plans.
+
+Example:
+
+Root Canal Treatment
+
+Sessions:
+
+Session 1
+
+Session 2
+
+Session 3
+
+Patients will be able to see their treatment plan inside the mobile app.
+
+Medical Files
+
+The doctor can upload:
+
+X-rays
+
+Prescription
+
+Treatment files
+
+Before/after photos
+
+Lab results
+
+Patients can view all uploaded files in the mobile app.
+
+Invoice System
+
+Invoices are generated after the visit.
+
+Because the actual treatment may differ from the booked service.
+
+Example:
+
+Patient booked cleaning.
+
+Doctor discovered root canal was required.
+
+Invoice is generated based on actual performed services.
+
+Payments
+
+The system supports multiple payment methods.
+
+Payment methods include:
+
+Cash
+
+Bank Transfer
+
+Instapay
+
+Vodafone Cash
+
+Mixed payments are allowed.
+
+Example:
+
+500 Cash
+500 Instapay
+
+Discounts & Promotions
+
+The system supports temporary promotions.
+
+Examples:
+
+Free consultation for 3 days
+
+20% discount on cleaning
+
+Fixed discount on visits
+
+Promotions can have:
+
+Start date
+
+End date
+
+Notifications
+
+Notifications will be sent using Firebase Cloud Messaging.
+
+Examples:
+
+Patient notifications:
+
+Appointment booked
+
+Appointment confirmed
+
+Appointment cancelled
+
+Reminder before appointment
+
+Invoice generated
+
+New medical file uploaded
+
+Admin notifications:
+
+New booking request
+
+Appointment cancelled
+
+New patient registration
+
+Reports
+
+The system will generate reports such as:
+
+Daily appointments
+
+Revenue reports
+
+Payment reports
+
+Patient statistics
+
+Most used services
+
+Doctor activity
+
+Languages
+
+The system supports:
+
+Arabic
+
+English
+
+The mobile application must support RTL layout.
+
+Mobile App Main Screens
+
+The Flutter application should include:
+
+Authentication
+
+Login
+
+Register
+
+Home
+
+Upcoming appointment
+
+Quick booking
+
+Book Appointment
+
+Choose service
+
+Choose date
+
+Choose time
+
+My Appointments
+
+Upcoming
+
+Completed
+
+Cancelled
+
+Ticket
+
+Display patient queue number.
+
+Invoices
+
+View invoices and payment details.
+
+Treatment Plan
+
+View treatment plan sessions.
+
+Medical Files
+
+View X-rays and prescriptions.
+
+Notifications
+
+List of notifications.
+
+Profile
+
+Patient profile information.
+
+Second Part
+Copilot Master Prompt
+(For Project Generation)
+
+يمكنك استخدام النص التالي مع Copilot:
+
+You are a senior Laravel and Flutter architect.
+
+Create a full architecture for a Dental Clinic Management System.
+
+The system consists of:
+
+Laravel 12 Backend (Dashboard + API)
+
+Flutter Mobile Application for Patients
+
+The system must support the following modules:
+
+Patients management
+Appointments scheduling
+Visits management
+Dental chart (odontogram)
+Treatment plans
+Medical files (X-rays, prescriptions)
+Invoices
+Payments (multiple payment methods)
+Promotions and discounts
+Ticket system
+Notifications using Firebase
+Reports
+Roles and permissions
+
+Roles include:
+
+Admin
+Doctor
+Receptionist
+Assistant
+Patient
+
+Appointment booking must work based on services with duration.
+
+Rules:
+
+Each service has a duration
+
+Two appointments cannot overlap
+
+Booking must be before the appointment time
+
+Patients can cancel appointments
+
+Waiting list should notify users when a slot becomes available
+
+The system must support:
+
+Partial payments
+Multiple payment methods
+Invoice generation after visit
+PDF invoices
+Arabic and English languages
+RTL support
+
+Laravel should implement:
+
+REST API
+
+Clean architecture
+
+Modular structure
+
+Service layer
+
+Repository pattern
+
+Queue jobs for notifications
+
+Activity logs
+
+Flutter should implement:
+
+Feature-first architecture
+
+Riverpod state management
+
+Dio for API calls
+
+Firebase push notifications
+
+Localization support
+
+RTL support
+
+Generate:
+
+Database schema
+API structure
+Module structure
+Project folder architecture
+Models and relationships

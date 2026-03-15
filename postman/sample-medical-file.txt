@@ -1,0 +1,3 @@
+Dental Clinic Postman sample file.
+Generated for testing the medical file upload endpoints.
+

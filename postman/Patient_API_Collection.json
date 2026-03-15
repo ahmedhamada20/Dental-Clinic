@@ -1,0 +1,542 @@
+{
+  "info": {
+    "name": "Dental Clinic – Patient API",
+    "_postman_id": "a1b2c3d4-0001-0000-0000-patient000001",
+    "description": "جميع نقاط نهاية API الخاصة بالمريض – تشمل المصادقة، المواعيد، الزيارات، الملفات الطبية، الفواتير، والإشعارات.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "base_url",      "value": "http://127.0.0.1:8000/api/v1/patient", "type": "string" },
+    { "key": "patient_token", "value": "YOUR_PATIENT_TOKEN_HERE",              "type": "string" },
+    { "key": "appointment_id","value": "1",                                    "type": "string" },
+    { "key": "waiting_id",    "value": "1",                                    "type": "string" },
+    { "key": "invoice_id",    "value": "1",                                    "type": "string" },
+    { "key": "payment_id",    "value": "1",                                    "type": "string" },
+    { "key": "treatment_plan_id", "value": "1",                                "type": "string" },
+    { "key": "prescription_id",   "value": "1",                                "type": "string" },
+    { "key": "medical_file_id",   "value": "1",                                "type": "string" },
+    { "key": "service_id",        "value": "1",                                "type": "string" },
+    { "key": "notification_id",   "value": "1",                                "type": "string" },
+    { "key": "device_token_id",   "value": "1",                                "type": "string" }
+  ],
+  "item": [
+
+    {
+      "name": "🔐 Auth",
+      "item": [
+        {
+          "name": "Register Patient",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/register", "host": ["{{base_url}}"], "path": ["register"] },
+            "body": {
+              "mode": "raw",
+              "options": { "raw": { "language": "json" } },
+              "raw": "{\n  \"first_name\": \"Ahmed\",\n  \"last_name\": \"Hassan\",\n  \"email\": \"ahmed.hassan@example.com\",\n  \"phone\": \"01012345678\",\n  \"password\": \"Patient@1234\",\n  \"password_confirmation\": \"Patient@1234\",\n  \"date_of_birth\": \"1990-06-15\",\n  \"gender\": \"male\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Login Patient",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var json = pm.response.json();",
+                  "if (json.data && json.data.token) {",
+                  "    pm.collectionVariables.set('patient_token', json.data.token);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/login", "host": ["{{base_url}}"], "path": ["login"] },
+            "body": {
+              "mode": "raw",
+              "options": { "raw": { "language": "json" } },
+              "raw": "{\n  \"phone\": \"01012345678\",\n  \"password\": \"Patient@1234\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Get My Profile (me)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{patient_token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/me", "host": ["{{base_url}}"], "path": ["me"] }
+          }
+        },
+        {
+          "name": "Change Password",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{patient_token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/change-password", "host": ["{{base_url}}"], "path": ["change-password"] },
+            "body": {
+              "mode": "raw",
+              "options": { "raw": { "language": "json" } },
+              "raw": "{\n  \"current_password\": \"Patient@1234\",\n  \"password\": \"NewPatient@5678\",\n  \"password_confirmation\": \"NewPatient@5678\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Logout Patient",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{patient_token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/logout", "host": ["{{base_url}}"], "path": ["logout"] }
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "👤 Profile",
+      "item": [
+        {
+          "name": "Get My Profile",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{patient_token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/profile", "host": ["{{base_url}}"], "path": ["profile"] }
+          }
+        },
+        {
+          "name": "Update My Profile",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{patient_token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/profile", "host": ["{{base_url}}"], "path": ["profile"] },
+            "body": {
+              "mode": "raw",
+              "options": { "raw": { "language": "json" } },
+              "raw": "{\n  \"first_name\": \"Ahmed\",\n  \"last_name\": \"Hassan\",\n  \"email\": \"ahmed.hassan.updated@example.com\",\n  \"date_of_birth\": \"1990-06-15\",\n  \"gender\": \"male\",\n  \"address\": \"123 Nile Street, Cairo\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Get Medical Summary",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{patient_token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/profile/medical-summary", "host": ["{{base_url}}"], "path": ["profile", "medical-summary"] }
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "🏥 Services (Public)",
+      "item": [
+        {
+          "name": "List All Services",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/services", "host": ["{{base_url}}"], "path": ["services"] }
+          }
+        },
+        {
+          "name": "Get Service by ID",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/services/{{service_id}}", "host": ["{{base_url}}"], "path": ["services", "{{service_id}}"] }
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "📅 Appointments",
+      "item": [
+        {
+          "name": "Get Available Slots",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{patient_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/appointments/available-slots?date=2026-03-20&doctor_id=1",
+              "host": ["{{base_url}}"],
+              "path": ["appointments", "available-slots"],
+              "query": [
+                { "key": "date",      "value": "2026-03-20" },
+                { "key": "doctor_id", "value": "1" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "List My Appointments",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{patient_token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/appointments", "host": ["{{base_url}}"], "path": ["appointments"] }
+          }
+        },
+        {
+          "name": "Book Appointment",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var json = pm.response.json();",
+                  "if (json.data && json.data.id) {",
+                  "    pm.collectionVariables.set('appointment_id', json.data.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{patient_token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/appointments", "host": ["{{base_url}}"], "path": ["appointments"] },
+            "body": {
+              "mode": "raw",
+              "options": { "raw": { "language": "json" } },
+              "raw": "{\n  \"doctor_id\": 1,\n  \"service_id\": 1,\n  \"appointment_date\": \"2026-03-20\",\n  \"appointment_time\": \"10:00\",\n  \"notes\": \"First visit – teeth cleaning\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Get Appointment Details",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{patient_token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/appointments/{{appointment_id}}", "host": ["{{base_url}}"], "path": ["appointments", "{{appointment_id}}"] }
+          }
+        },
+        {
+          "name": "Cancel Appointment",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{patient_token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/appointments/{{appointment_id}}/cancel", "host": ["{{base_url}}"], "path": ["appointments", "{{appointment_id}}", "cancel"] },
+            "body": {
+              "mode": "raw",
+              "options": { "raw": { "language": "json" } },
+              "raw": "{\n  \"reason\": \"Conflict in schedule\"\n}"
+            }
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "⏳ Waiting List",
+      "item": [
+        {
+          "name": "Join Waiting List",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var json = pm.response.json();",
+                  "if (json.data && json.data.id) {",
+                  "    pm.collectionVariables.set('waiting_id', json.data.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{patient_token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/waiting-list", "host": ["{{base_url}}"], "path": ["waiting-list"] },
+            "body": {
+              "mode": "raw",
+              "options": { "raw": { "language": "json" } },
+              "raw": "{\n  \"doctor_id\": 1,\n  \"service_id\": 1,\n  \"preferred_date\": \"2026-03-25\",\n  \"notes\": \"Flexible timing preferred morning\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Get My Waiting List",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{patient_token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/waiting-list", "host": ["{{base_url}}"], "path": ["waiting-list"] }
+          }
+        },
+        {
+          "name": "Claim Slot from Waiting List",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{patient_token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/waiting-list/{{waiting_id}}/claim-slot", "host": ["{{base_url}}"], "path": ["waiting-list", "{{waiting_id}}", "claim-slot"] },
+            "body": {
+              "mode": "raw",
+              "options": { "raw": { "language": "json" } },
+              "raw": "{\n  \"appointment_date\": \"2026-03-25\",\n  \"appointment_time\": \"09:30\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Leave Waiting List",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{patient_token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/waiting-list/{{waiting_id}}", "host": ["{{base_url}}"], "path": ["waiting-list", "{{waiting_id}}"] }
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "💊 Medical Records",
+      "item": [
+        {
+          "name": "Treatment Plans – List",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{patient_token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/treatment-plans", "host": ["{{base_url}}"], "path": ["treatment-plans"] }
+          }
+        },
+        {
+          "name": "Treatment Plans – Show",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{patient_token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/treatment-plans/{{treatment_plan_id}}", "host": ["{{base_url}}"], "path": ["treatment-plans", "{{treatment_plan_id}}"] }
+          }
+        },
+        {
+          "name": "Prescriptions – List",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{patient_token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/prescriptions", "host": ["{{base_url}}"], "path": ["prescriptions"] }
+          }
+        },
+        {
+          "name": "Prescriptions – Show",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{patient_token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/prescriptions/{{prescription_id}}", "host": ["{{base_url}}"], "path": ["prescriptions", "{{prescription_id}}"] }
+          }
+        },
+        {
+          "name": "Medical Files – List",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{patient_token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/medical-files", "host": ["{{base_url}}"], "path": ["medical-files"] }
+          }
+        },
+        {
+          "name": "Medical Files – Show",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{patient_token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/medical-files/{{medical_file_id}}", "host": ["{{base_url}}"], "path": ["medical-files", "{{medical_file_id}}"] }
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "💰 Billing",
+      "item": [
+        {
+          "name": "Invoices – List",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{patient_token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/invoices", "host": ["{{base_url}}"], "path": ["invoices"] }
+          }
+        },
+        {
+          "name": "Invoices – Show",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{patient_token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/invoices/{{invoice_id}}", "host": ["{{base_url}}"], "path": ["invoices", "{{invoice_id}}"] }
+          }
+        },
+        {
+          "name": "Invoices – Download PDF",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept",        "value": "application/pdf" },
+              { "key": "Authorization", "value": "Bearer {{patient_token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/invoices/{{invoice_id}}/pdf", "host": ["{{base_url}}"], "path": ["invoices", "{{invoice_id}}", "pdf"] }
+          }
+        },
+        {
+          "name": "Payments – List",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{patient_token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/payments", "host": ["{{base_url}}"], "path": ["payments"] }
+          }
+        },
+        {
+          "name": "Payments – Show",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{patient_token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/payments/{{payment_id}}", "host": ["{{base_url}}"], "path": ["payments", "{{payment_id}}"] }
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "🔔 Notifications",
+      "item": [
+        {
+          "name": "List Notifications",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{patient_token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/notifications", "host": ["{{base_url}}"], "path": ["notifications"] }
+          }
+        },
+        {
+          "name": "Mark Notification as Read",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{patient_token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/notifications/{{notification_id}}/read", "host": ["{{base_url}}"], "path": ["notifications", "{{notification_id}}", "read"] }
+          }
+        },
+        {
+          "name": "Mark All Notifications as Read",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{patient_token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/notifications/read-all", "host": ["{{base_url}}"], "path": ["notifications", "read-all"] }
+          }
+        },
+        {
+          "name": "Register Device Token",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{patient_token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/device-tokens", "host": ["{{base_url}}"], "path": ["device-tokens"] },
+            "body": {
+              "mode": "raw",
+              "options": { "raw": { "language": "json" } },
+              "raw": "{\n  \"token\": \"ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]\",\n  \"platform\": \"android\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Delete Device Token",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Accept",        "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{patient_token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/device-tokens/{{device_token_id}}", "host": ["{{base_url}}"], "path": ["device-tokens", "{{device_token_id}}"] }
+          }
+        }
+      ]
+    }
+
+  ]
+}
+
