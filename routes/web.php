@@ -106,6 +106,9 @@ Route::middleware(['auth', 'clinic.role:admin,doctor,receptionist,assistant'])->
     Route::post('/appointments', [AppointmentController::class, 'store'])
         ->middleware('can:appointments.create')
         ->name('appointments.store');
+    Route::post('/appointments/{appointment}/status', [AppointmentController::class, 'updateStatus'])
+        ->middleware('can:appointments.edit')
+        ->name('appointments.status.update');
     Route::get('/appointments/{appointment}', [AppointmentController::class, 'show'])
         ->middleware('can:appointments.view')
         ->name('appointments.show');

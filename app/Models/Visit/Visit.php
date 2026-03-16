@@ -51,6 +51,7 @@ class Visit extends Model
         'doctor_id',
         'checked_in_by',
         'visit_date',
+        'visit_date',
         'start_at',
         'end_at',
         'status',
@@ -64,9 +65,9 @@ class Visit extends Model
     {
         return [
             'visit_date' => 'date',
-            'start_at'   => 'datetime',
-            'end_at'     => 'datetime',
-            'status'     => VisitStatus::class,
+            'start_at' => 'datetime',
+            'end_at' => 'datetime',
+            'status' => VisitStatus::class,
         ];
     }
 
@@ -87,18 +88,22 @@ class Visit extends Model
      * Runs inside its own DB transaction with a SELECT … FOR UPDATE so that
      * concurrent requests cannot read the same MAX and produce the same number.
      */
-    private static function reserveNextVisitNumber(): string
+    protected static function reserveNextVisitNumber(): string
     {
-        return DB::transaction(static function (): string {
-            // Lock all existing visit rows so no concurrent transaction
-            // can read a stale MAX until we finish and commit.
-            $max = DB::table('visits')
-                ->lockForUpdate()
-                ->selectRaw('COALESCE(MAX(CAST(visit_no AS UNSIGNED)), 0) AS max_no')
-                ->value('max_no');
+        $prefix = 'VIS-' . now()->format('Ymd') . '-';
 
-            return (string) ((int) $max + 1);
-        });
+        $lastVisit = static::where('visit_no', 'like', $prefix . '%')
+            ->orderByDesc('id')
+            ->first();
+
+        if (!$lastVisit) {
+            $number = 70000;
+        } else {
+            $lastNumber = (int)substr($lastVisit->visit_no, -5);
+            $number = $lastNumber + 1;
+        }
+
+        return $prefix . str_pad($number, 5, '0', STR_PAD_LEFT);
     }
 
     // ==================== Scopes ====================

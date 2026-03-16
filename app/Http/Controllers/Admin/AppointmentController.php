@@ -44,7 +44,14 @@ class AppointmentController extends Controller
         $appointment = new Appointment();
         $table = $appointment->getTable();
 
-        $query = $this->scopeAppointments(Appointment::query()->with(['patient', 'doctor.specialty', 'service.category.medicalSpecialty', 'specialty']));
+        $monthInput = $request->input('month', now()->format('Y-m'));
+        try {
+            $calendarDate = Carbon::createFromFormat('Y-m', $monthInput)->startOfMonth();
+        } catch (\Throwable) {
+            $calendarDate = now()->startOfMonth();
+        }
+
+        $query = $this->scopeAppointments(Appointment::query()->with(['patient', 'doctor.specialty', 'service.category.medicalSpecialty', 'specialty', 'visit']));
 
 
         if ($request->filled('search')) {
@@ -65,12 +72,13 @@ class AppointmentController extends Controller
             $query->where('status', $request->string('status'));
         }
 
-        if ($request->filled('status') && Schema::hasColumn($table, 'status')) {
-            $query->where('status', $request->string('status'));
-        }
-
         if ($request->filled('date') && Schema::hasColumn($table, 'appointment_date')) {
             $query->whereDate('appointment_date', $request->string('date'));
+        } elseif (Schema::hasColumn($table, 'appointment_date')) {
+            $query->whereBetween('appointment_date', [
+                $calendarDate->copy()->startOfMonth()->toDateString(),
+                $calendarDate->copy()->endOfMonth()->toDateString(),
+            ]);
         }
 
         if ($request->filled('specialty_id') && Schema::hasColumn($table, 'specialty_id')) {
@@ -78,17 +86,67 @@ class AppointmentController extends Controller
         }
 
         if (Schema::hasColumn($table, 'appointment_date')) {
-            $query->latest('appointment_date')->latest('start_time');
+            $query->orderBy('appointment_date')->orderBy('start_time');
         } else {
             $query->latest();
         }
 
-        $appointments = $query->paginate(15)->withQueryString();
+        $appointments = $query->get();
+        $appointmentsByDate = $appointments->groupBy(
+            fn (Appointment $item) => optional($item->appointment_date)->toDateString()
+        );
 
         $statuses = AppointmentStatus::cases();
         $specialties = MedicalSpecialty::query()->where('is_active', true)->orderBy('name')->get();
 
-        return view('admin.appointments.index', compact('appointments', 'statuses', 'specialties'));
+        $calendarStart = $calendarDate->copy()->startOfMonth()->startOfWeek(Carbon::SATURDAY);
+        $calendarEnd = $calendarDate->copy()->endOfMonth()->endOfWeek(Carbon::FRIDAY);
+
+        return view('admin.appointments.index', compact(
+            'appointments',
+            'appointmentsByDate',
+            'statuses',
+            'specialties',
+            'calendarDate',
+            'calendarStart',
+            'calendarEnd'
+        ));
+    }
+
+    public function updateStatus(Appointment $appointment, AppointmentStatusTransitionRequest $request): RedirectResponse
+    {
+        $this->ensureCanAccessAppointment($appointment);
+
+        if (($appointment->status?->value ?? $appointment->status) === AppointmentStatus::CONFIRMED->value) {
+            return redirect()->back()->with('error', 'This appointment is already confirmed and cannot be modified.');
+        }
+
+        $status = AppointmentStatus::tryFrom((string) $request->input('status'));
+
+        if (! $status) {
+            return redirect()->back()->with('error', 'Invalid appointment status selected.');
+        }
+
+        $notes = $request->input('notes');
+
+        match ($status) {
+            AppointmentStatus::CONFIRMED => $this->workflowService->confirm($appointment, auth()->id(), $notes),
+            AppointmentStatus::CHECKED_IN => $this->workflowService->checkIn($appointment, auth()->id(), $notes),
+            AppointmentStatus::NO_SHOW => $this->workflowService->markNoShow($appointment, auth()->id(), $notes),
+            AppointmentStatus::COMPLETED => $this->workflowService->complete($appointment, auth()->id(), $notes),
+            default => null,
+        };
+
+        if (! in_array($status, [
+            AppointmentStatus::CONFIRMED,
+            AppointmentStatus::CHECKED_IN,
+            AppointmentStatus::NO_SHOW,
+            AppointmentStatus::COMPLETED,
+        ], true)) {
+            return redirect()->back()->with('error', 'Selected status is not supported in quick actions.');
+        }
+
+        return redirect()->back()->with('success', __('admin.appointments.updated'));
     }
 
     public function daily(Request $request): View
@@ -317,6 +375,12 @@ class AppointmentController extends Controller
     public function update(Request $request, Appointment $appointment): RedirectResponse
     {
         $this->ensureCanAccessAppointment($appointment);
+
+        if (($appointment->status?->value ?? $appointment->status) === AppointmentStatus::CONFIRMED->value) {
+            return redirect()
+                ->route('admin.appointments.show', $appointment)
+                ->with('error', 'This appointment is already confirmed and cannot be modified.');
+        }
 
         $validated = $this->validateAppointment($request, $appointment);
         $this->assertAppointmentInputWithinScope($validated);

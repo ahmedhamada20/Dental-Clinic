@@ -3,9 +3,11 @@
 namespace App\Services;
 
 use App\Enums\AppointmentStatus;
+use App\Enums\VisitStatus;
 use App\Enums\WaitingListStatus;
 use App\Models\Appointment\Appointment;
 use App\Models\Appointment\WaitingListRequest;
+use App\Models\Visit\Visit;
 use App\Modules\Appointments\Services\AppointmentStatusService;
 use App\Modules\Audit\Services\AuditLogService;
 use Carbon\CarbonImmutable;
@@ -23,15 +25,27 @@ class AppointmentWorkflowService
 
     public function confirm(Appointment $appointment, ?int $adminId, ?string $notes = null): Appointment
     {
-        return $this->transition($appointment, AppointmentStatus::CONFIRMED, $adminId, $notes, function (Appointment $a) {
-            $a->confirmed_at = now();
+        return DB::transaction(function () use ($appointment, $adminId, $notes) {
+            $confirmed = $this->transition($appointment, AppointmentStatus::CONFIRMED, $adminId, $notes, function (Appointment $a) {
+                $a->confirmed_at = now();
+            });
+
+            $this->createVisitFromConfirmedAppointment($confirmed, $adminId, $notes);
+
+            return $confirmed->refresh();
         });
     }
 
     public function checkIn(Appointment $appointment, ?int $adminId, ?string $notes = null): Appointment
     {
-        return $this->transition($appointment, AppointmentStatus::CHECKED_IN, $adminId, $notes, function (Appointment $a) {
-            $a->checked_in_at = now();
+        return DB::transaction(function () use ($appointment, $adminId, $notes) {
+            $checkedIn = $this->transition($appointment, AppointmentStatus::CHECKED_IN, $adminId, $notes, function (Appointment $a) {
+                $a->checked_in_at = now();
+            });
+
+            $this->createVisitFromCheckedInAppointment($checkedIn, $adminId, $notes);
+
+            return $checkedIn->refresh();
         });
     }
 
@@ -213,6 +227,71 @@ class AppointmentWorkflowService
         $minutes = $start->diffInMinutes($end, false);
 
         return $minutes > 0 ? $minutes : 30;
+    }
+
+    private function createVisitFromCheckedInAppointment(Appointment $appointment, ?int $adminId, ?string $notes = null): void
+    {
+        $existingVisit = $appointment->visit;
+
+        if ($existingVisit) {
+            if (($existingVisit->status?->value ?? $existingVisit->status) !== VisitStatus::CHECKED_IN->value) {
+                $existingVisit->update([
+                    'status' => VisitStatus::CHECKED_IN,
+                    'checked_in_by' => $adminId,
+                ]);
+            }
+
+            return;
+        }
+
+        if (! $appointment->patient_id || ! $appointment->assigned_doctor_id) {
+            throw new InvalidArgumentException('Appointment must have patient and doctor before check-in.');
+        }
+
+        $internalNotes = 'Created from appointment check-in.';
+        if (filled($notes)) {
+            $internalNotes .= PHP_EOL . $notes;
+        }
+
+        Visit::query()->create([
+            'appointment_id' => $appointment->id,
+            'patient_id' => $appointment->patient_id,
+            'doctor_id' => $appointment->assigned_doctor_id,
+            'checked_in_by' => $adminId,
+            'visit_date' => $appointment->appointment_date?->toDateString() ?? now()->toDateString(),
+            'status' => VisitStatus::CHECKED_IN,
+            'internal_notes' => $internalNotes,
+        ]);
+    }
+
+    private function createVisitFromConfirmedAppointment(Appointment $appointment, ?int $adminId, ?string $notes = null): void
+    {
+
+        if ($appointment->visit()->exists()) {
+            return;
+        }
+
+        if (! $appointment->patient_id || ! $appointment->assigned_doctor_id) {
+            throw new InvalidArgumentException('Appointment must have patient and doctor before confirmation.');
+        }
+
+        $confirmationDate = $appointment->confirmed_at?->toDateString() ?? now()->toDateString();
+        $internalNotes = 'Created from appointment confirmation.';
+        if (filled($notes)) {
+            $internalNotes .= PHP_EOL . $notes;
+        }
+
+
+
+        Visit::query()->create([
+            'appointment_id' => $appointment->id,
+            'patient_id' => $appointment->patient_id,
+            'doctor_id' => $appointment->assigned_doctor_id,
+            'checked_in_by' => $adminId,
+            'visit_date' => $confirmationDate,
+            'status' => VisitStatus::CHECKED_IN,
+            'internal_notes' => $internalNotes,
+        ]);
     }
 }
 

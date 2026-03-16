@@ -3,6 +3,8 @@
 namespace App\Modules\Audit\Support;
 
 use App\Models\System\AuditLog;
+use App\Models\User;
+use App\Models\Patient\Patient;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
@@ -26,8 +28,14 @@ class AuditLogger
         $entityType = is_string($entity) ? $entity : $entity?->getMorphClass();
         $entityId = $entity instanceof Model ? $entity->getKey() : null;
 
+        $actorType = match (true) {
+            $actor instanceof User => 'user',
+            $actor instanceof Patient => 'patient',
+            default => 'system',
+        };
+
         return AuditLog::query()->create([
-            'actor_type' => $actor ? class_basename($actor) : 'system',
+            'actor_type' => $actorType,
 //            'actor_id' => $actor?->getAuthIdentifier(),
             'action' => $action,
             'module' => $module,
