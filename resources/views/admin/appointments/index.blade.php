@@ -22,11 +22,17 @@
 
     <form method="GET" class="card card-body mb-3">
         <div class="row g-2">
-            <div class="col-md-3">
+
+            <div class="col-md-4">
+                <label class="form-label">{{ __('common.search') }}</label>
+                <input type="text" name="search" class="form-control" value="{{ request('search') }}" placeholder="{{ __('patients.index.filters.search_placeholder') }}">
+            </div>
+
+            <div class="col-md-2">
                 <label class="form-label">{{ __('common.date') }}</label>
                 <input type="date" name="date" class="form-control" value="{{ request('date') }}">
             </div>
-            <div class="col-md-3">
+            <div class="col-md-2">
                 <label class="form-label">{{ __('common.status') }}</label>
                 <select name="status" class="form-select">
                     <option value="">{{ __('common.all') }}</option>
@@ -37,7 +43,7 @@
                     @endforeach
                 </select>
             </div>
-            <div class="col-md-3">
+            <div class="col-md-2">
                 <label class="form-label">{{ __('appointments.filters.specialty') }}</label>
                 <select name="specialty_id" class="form-select">
                     <option value="">{{ __('common.all') }}</option>

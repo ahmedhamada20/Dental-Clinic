@@ -46,6 +46,25 @@ class AppointmentController extends Controller
 
         $query = $this->scopeAppointments(Appointment::query()->with(['patient', 'doctor.specialty', 'service.category.medicalSpecialty', 'specialty']));
 
+
+        if ($request->filled('search')) {
+            $search = trim($request->string('search')->toString());
+            $query->where(function ($q) use ($search) {
+                $q->whereHas('patient', function ($patientQuery) use ($search) {
+                    $patientQuery->where('first_name', 'like', "%{$search}%")
+                        ->orWhere('last_name', 'like', "%{$search}%")
+                        ->orWhere('full_name', 'like', "%{$search}%")
+                        ->orWhere('phone', 'like', "%{$search}%")
+                        ->orWhere('email', 'like', "%{$search}%")
+                        ->orWhere('patient_code', 'like', "%{$search}%");
+                });
+            });
+        }
+
+        if ($request->filled('status') && Schema::hasColumn($table, 'status')) {
+            $query->where('status', $request->string('status'));
+        }
+
         if ($request->filled('status') && Schema::hasColumn($table, 'status')) {
             $query->where('status', $request->string('status'));
         }
