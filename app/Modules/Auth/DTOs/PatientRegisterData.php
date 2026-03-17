@@ -14,6 +14,8 @@ class PatientRegisterData
         public readonly string $password,
         public readonly ?string $gender,
         public readonly ?string $device_name,
+        public readonly ?string $firebase_token,
+        public readonly ?string $device_type,
     ) {
     }
 
@@ -27,6 +29,8 @@ class PatientRegisterData
             password: $request->validated('password'),
             gender: $request->validated('gender'),
             device_name: $request->validated('device_name', 'mobile'),
+            firebase_token: $request->validated('firebase_token'),
+            device_type: $request->validated('device_type'),
         );
     }
 }

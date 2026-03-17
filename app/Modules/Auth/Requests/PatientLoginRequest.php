@@ -3,6 +3,7 @@
 namespace App\Modules\Auth\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class PatientLoginRequest extends FormRequest
 {
@@ -17,6 +18,8 @@ class PatientLoginRequest extends FormRequest
             'phone' => ['required', 'string'],
             'password' => ['required', 'string'],
             'device_name' => ['nullable', 'string', 'max:255'],
+            'firebase_token' => ['nullable', 'string', 'max:1000'],
+            'device_type' => ['required_with:firebase_token', 'string', Rule::in(['android', 'ios'])],
         ];
     }
 

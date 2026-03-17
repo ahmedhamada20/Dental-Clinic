@@ -30,6 +30,7 @@ class PatientAuthController extends Controller
         return ApiResponse::success(
             [
                 'token' => $result['token'],
+                'firebase_token_registered' => $result['firebase_token_registered'] ?? false,
                 'patient' => new AuthPatientResource($result['patient']),
             ],
             'Patient registered successfully.'
@@ -47,6 +48,7 @@ class PatientAuthController extends Controller
         return ApiResponse::success(
             [
                 'token' => $result['token'],
+                'firebase_token_registered' => $result['firebase_token_registered'] ?? false,
                 'patient' => new AuthPatientResource($result['patient']),
             ],
             'Login successful.'
